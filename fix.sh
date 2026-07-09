@@ -19,17 +19,17 @@ echo "=== Nextcloud App Store Fixer ==="
 # Check if the container is currently active
 if [ ! "$(docker ps -q -f name=${CONTAINER_NAME})" ]; then
     echo "❌ Error: Container '${CONTAINER_NAME}' is not running."
-    echo "Please run 'docker-compose up -d' first."
+    echo "Please run 'docker compose up -d' first."
     exit 1
 fi
 
 echo "🔄 Step 1: Clearing Nextcloud app store offline flags..."
-docker exec -it -u www-data ${CONTAINER_NAME} php occ config:app:delete core appstorenotavailable
+docker exec -u www-data ${CONTAINER_NAME} php occ config:app:delete core appstorenotavailable
 
 echo "🔄 Step 2: Clearing app store connection cache..."
-docker exec -it -u www-data ${CONTAINER_NAME} php occ config:app:delete core appstoreenabled
+docker exec -u www-data ${CONTAINER_NAME} php occ config:app:delete core appstoreenabled
 
 echo "⚙️ Step 3: Forcing an internal app data update..."
-docker exec -it -u www-data ${CONTAINER_NAME} php occ app:update --all
+docker exec -u www-data ${CONTAINER_NAME} php occ app:update --all
 
-echo "✨ Done! Refresh your browser at http://cloud.test and check the Apps tab."
+echo "✨ Done! Refresh your browser at http://cloud.test:8080 and check the Apps tab."
