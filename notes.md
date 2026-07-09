@@ -47,13 +47,68 @@ echo '127.0.0.1 cloud.test collabora.test' | sudo tee -a /etc/hosts
 ```
 
 
+# Running with Podman (alternative to Docker Compose)
+
+The same stack is also provided for Podman, where all three containers run in a
+single **pod** (one shared network namespace = they talk over `127.0.0.1`).
+
+Two ways to start it, pick one:
+
+- **Declarative** — `podman play kube nextcloud-kube.yaml`
+  (tear down with `podman play kube --down nextcloud-kube.yaml`).
+- **Imperative** — `./pod.sh`, which builds the pod with `podman pod create` +
+  `podman run`. Re-running it recreates the pod from scratch while preserving
+  the `nextcloud_data` volume.
+
+Both are equivalent to `docker-compose.yaml`. Because a pod can't have two
+containers on `:80`, the Podman version keeps nginx on `:80` and moves
+Nextcloud's Apache to `:8080` (an idempotent `sed`, see `pod.sh` /
+`nextcloud-kube.yaml`). nginx then proxies to `127.0.0.1:8080` and
+`127.0.0.1:9980` — this is why the Podman setup uses `nginx.pod.conf` instead of
+`nginx.conf`. The Docker "network aliases" trick is replaced by `/etc/hosts`
+entries (`hostAliases` / `--add-host`) mapping `cloud.test` and `collabora.test`
+to `127.0.0.1`.
+
+The one-time host setup above (the `/etc/hosts` line) still applies.
+
+## Scripts
+
+| Script | Runtime | What it does |
+|--------|---------|--------------|
+| `start.sh` | Docker | `docker-compose up -d`. |
+| `pod.sh` | Podman | Creates the pod and all three containers imperatively. |
+| `fix.sh` | Docker | **Break-glass.** Clears Nextcloud's sticky "App Store not available" cache. |
+| `fix-pod.sh` | Podman | Same as `fix.sh`, via `podman exec`. |
+
+### About `fix.sh` / `fix-pod.sh` — when (and whether) to run them
+
+These are **not** part of normal startup. They only exist to fix one symptom:
+the Apps page showing *"App Store not available"* / *"couldn't find any apps"*.
+
+Root cause is DNS — the Nextcloud container can't reach `apps.nextcloud.com`.
+Both the Compose and Podman definitions already give Nextcloud `8.8.8.8` /
+`1.1.1.1`, so you normally won't hit this. The catch: the first time Nextcloud
+fails, it caches a sticky `appstorenotavailable` flag and keeps showing the
+error even after DNS is fine. The fix scripts clear that cache and force a fresh
+catalog pull:
+
+1. `occ config:app:delete core appstorenotavailable` — drop the sticky flag.
+2. `occ config:app:delete core appstoreenabled` — reset the cached app-store state.
+3. `occ app:update --all` — re-fetch the live catalog.
+
+Run the one matching your runtime (`./fix.sh` for Docker, `./fix-pod.sh` for
+Podman) **only if** the Apps page misbehaves, then refresh the browser.
+
+
 # Post-Startup Setup
 
-After `docker-compose up -d`, do the following once in the Nextcloud UI.
+After the stack is up (`docker-compose up -d`, `./pod.sh`, or
+`podman play kube …`), do the following once in the Nextcloud UI.
 
 ## Step 1 — Fix the app store (if it says "couldn't find any apps")
 
-Run `./fix.sh`, then refresh the browser.
+Run `./fix.sh` (Docker) or `./fix-pod.sh` (Podman), then refresh the browser.
+See "About `fix.sh` / `fix-pod.sh`" above — you usually won't need this.
 
 ## Step 2 — Install Nextcloud Office app
 
