@@ -4,11 +4,11 @@ Quick demo of bringing up Nextcloud locally.
 
 ## Screenshots
 
-### Login Page
+### Writer
 
 [![Login](pics/screenshot-2026-07-10_09-44-53.png)](pics/screenshot-2026-07-10_09-44-53.png)
 
-### Main Dashboard
+### Maps
 
 [![Dashboard](pics/screenshot-2026-07-10_09-45-36.png)](pics/screenshot-2026-07-10_09-45-36.png)
 
