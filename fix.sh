@@ -32,4 +32,4 @@ docker exec -it -u www-data ${CONTAINER_NAME} php occ config:app:delete core app
 echo "⚙️ Step 3: Forcing an internal app data update..."
 docker exec -it -u www-data ${CONTAINER_NAME} php occ app:update --all
 
-echo "✨ Done! Refresh your browser at http://cloud.localhost and check the Apps tab."
+echo "✨ Done! Refresh your browser at http://cloud.test and check the Apps tab."
