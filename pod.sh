@@ -67,7 +67,7 @@ podman run -d --pod "$POD" --name collabora-backend \
     --cap-add SYS_ADMIN \
     --cap-add MKNOD \
     -e "aliasgroup1=${BASE_URL}" \
-    -e "extra_params=--o:ssl.enable=false --o:ssl.termination=false" \
+    -e "extra_params=--o:ssl.enable=false --o:ssl.termination=false --o:server_name=${OFFICE_HOST}:${HOST_PORT}" \
     docker.io/collabora/code:latest >/dev/null
 
 # --- Nextcloud frontend (Apache moved to 8081) ---------------------------------

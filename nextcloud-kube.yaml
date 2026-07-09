@@ -117,8 +117,10 @@ spec:
       env:
         - name: aliasgroup1
           value: "http://cloud.test:8080"
+        # server_name tells Collabora its public host:port so the editor URLs in
+        # its discovery XML carry :8080 (else the browser is sent to :80 and fails).
         - name: extra_params
-          value: "--o:ssl.enable=false --o:ssl.termination=false"
+          value: "--o:ssl.enable=false --o:ssl.termination=false --o:server_name=collabora.test:8080"
       securityContext:
         capabilities:
           add:

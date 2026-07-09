@@ -69,6 +69,28 @@ If nginx listened on :80 internally while the browser used :8080, Nextcloud's
 in-container call to `collabora.test:8080` would hit Apache (or nothing) instead of
 nginx, and document editing would silently break.
 
+## Collabora's server_name (or the editor won't load)
+
+There's a second, sneakier place the port has to be right. Collabora builds the
+editor URLs it hands the **browser** — the `urlsrc` values in its
+`/hosting/discovery` XML — from its **own** `server_name`, not from how Nextcloud
+reached it. With no `server_name` set, it defaults to the bare host and **drops the
+port**, so the browser is sent to `http://collabora.test/browser/…` (:80, which
+nothing serves) and you get *"Your browser has been unable to connect to the
+Collabora server"*.
+
+The catch: Nextcloud's admin **reachability check still passes**, because that is a
+server-side call (Nextcloud → Collabora discovery, which works); only the URLs
+*inside* the payload are wrong. So we set it explicitly on the Collabora container:
+
+```
+extra_params=… --o:server_name=collabora.test:8080
+```
+
+(see `pod.sh`, `docker-compose.yaml`, `nextcloud-kube.yaml`). After changing it,
+refresh Nextcloud's cached discovery with
+`occ richdocuments:activate-config` and hard-refresh the browser tab.
+
 ---
 
 ## How the turnkey setup works (no wizard, no manual Collabora config)

@@ -132,6 +132,14 @@ table above) so the install picks up the current settings.
 First-boot only: Nextcloud is still installing and the Office app is downloading.
 Wait ~1 minute. Check progress with the *Logs* command above.
 
+**Document editor won't open — "browser has been unable to connect to the Collabora server"**
+Collabora must advertise its public host *and port*. It's set via
+`--o:server_name=collabora.test:8080` on the Collabora container (already in all
+three configs). If you changed the port/host, update it there too, then run
+`occ richdocuments:activate-config` and hard-refresh the browser tab (Ctrl+Shift+R).
+Note the admin "Collabora is reachable" check can be green even when this is wrong,
+because that check is server-side — see [notes.md](notes.md).
+
 **Apps page says "App Store not available" / Office didn't install**
 The container couldn't reach `apps.nextcloud.com` on first boot (DNS/offline).
 It retries on every restart, so just restart the stack once you're online — or

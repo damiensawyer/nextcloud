@@ -63,7 +63,9 @@ services:
     environment:
       # cloud.test:8080 is what the browser uses to access Nextcloud (via nginx).
       - aliasgroup1=http://cloud.test:8080
-      - extra_params=--o:ssl.enable=false --o:ssl.termination=false
+      # server_name tells Collabora its public host:port so the editor URLs in
+      # its discovery XML carry :8080 (else the browser is sent to :80 and fails).
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=false --o:server_name=collabora.test:8080
     cap_add:
       - SYS_ADMIN
       - MKNOD
