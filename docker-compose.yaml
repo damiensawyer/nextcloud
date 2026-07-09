@@ -1,0 +1,42 @@
+services:
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - nextcloud
+      - collabora
+    restart: always
+
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud-frontend
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    volumes:
+      - nextcloud_data:/var/www/html
+    depends_on:
+      - collabora
+    restart: always
+
+
+  collabora:
+    image: collabora/code:latest
+    container_name: collabora-backend
+    environment:
+      # cloud.localhost is what the browser uses to access Nextcloud (via nginx)
+      - aliasgroup1=http://cloud.localhost
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=false
+    cap_add:
+      - SYS_ADMIN
+      - MKNOD
+    restart: always
+
+volumes:
+  nextcloud_data:
