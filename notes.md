@@ -20,6 +20,7 @@ container `collabora.localhost` loops back to the container *itself*, not to ngi
 - Collabora → `cloud.localhost` (the WOPI callback) would have looped back the same way.
 
 `.test` is a reserved TLD that is NOT special-cased, so:
+
 - Docker's embedded DNS (127.0.0.11) resolves it inside containers via nginx network
   aliases (see docker-compose.yaml → nginx → networks.default.aliases).
 - The host resolves it via one `/etc/hosts` line (see setup below).
@@ -27,6 +28,7 @@ container `collabora.localhost` loops back to the container *itself*, not to ngi
 ## Why nginx was needed
 
 Without a reverse proxy there are three conflicting URL requirements:
+
 1. Browser → Collabora: needs a hostname the browser can resolve.
 2. Nextcloud → Collabora: needs a hostname that resolves inside Docker.
 3. Collabora → Nextcloud WOPI callback: needs a hostname Collabora can reach in Docker.
@@ -37,7 +39,6 @@ traffic, ruling out the simpler network_mode:host approach for Collabora.
 
 Credentials: damien / password
 
-
 # One-time Host Setup
 
 `.test` is not auto-resolved by browsers, so add it to the host hosts file ONCE:
@@ -45,7 +46,6 @@ Credentials: damien / password
 ```
 echo '127.0.0.1 cloud.test collabora.test' | sudo tee -a /etc/hosts
 ```
-
 
 # Post-Startup Setup
 
@@ -70,12 +70,6 @@ Select **"Use your own server"** and enter:
 http://collabora.test
 ```
 
-Set the **WOPI allow list** to:
-
-```
-172.16.0.0/12
-```
-
 Click **Save**. It should show a green "Collabora Online is reachable" confirmation.
 
 (Equivalent via CLI — already applied by the setup:)
@@ -93,4 +87,4 @@ occ config:app:set richdocuments wopi_allowlist --value=172.16.0.0/12
 
 Upload any `.odt` or `.docx` file and click it. It should open in the embedded editor.
 
-> Access Nextcloud at http://cloud.test (not localhost:8080)
+> Access Nextcloud at <http://cloud.test> (not localhost:8080)
